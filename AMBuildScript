@@ -1,0 +1,57 @@
+# vim: set sts=4 ts=8 sw=4 tw=99 et ft=python:
+import os
+
+builder.cxx = builder.DetectCxx()
+if builder.cxx.like('gcc'):
+    builder.cxx.cflags += [
+        '-Wall',
+        '-Werror'
+    ]
+    builder.cxx.cxxflags += [
+        '-std=c++17',
+    ]
+
+builder.cxx.cxxincludes += [
+    os.path.join(builder.sourcePath, 'third_party', 'amtl'),
+]
+
+libaddrz = builder.cxx.StaticLibrary('addrz')
+libaddrz.sources += [
+    'addrz.cpp',
+    'mapping.cpp',
+    'platform.cpp',
+    'proc_maps.cpp',
+]
+if libaddrz.compiler.target.platform == 'linux':
+    libaddrz.sources += ['platform_linux.cpp']
+libaddrz_bin = builder.Add(libaddrz)
+
+### TESTING ###
+
+binary = builder.cxx.StaticLibrary('libgtest')
+binary.compiler.includes += [
+  os.path.join(builder.sourcePath, 'third_party', 'googletest', 'googletest', 'include'),
+  os.path.join(builder.sourcePath, 'third_party', 'googletest', 'googletest'),
+]
+binary.sources += [
+  os.path.join('third_party', 'googletest', 'googletest', 'src', 'gtest-all.cc'),
+]
+libgtest = builder.Add(binary)
+
+tests = builder.cxx.Program("tests")
+tests.compiler.cxxincludes += [
+    os.path.join(builder.sourcePath, 'third_party', 'googletest', 'googletest', 'include'),
+]
+tests.sources += [
+    'addrz_test.cpp',
+    'mapping_test.cpp',
+    'platform_test.cpp',
+    'proc_maps_test.cpp',
+    'tests.cpp',
+]
+
+tests.compiler.postlink += [
+    libaddrz_bin.binary,
+    libgtest.binary,
+]
+builder.Add(tests)

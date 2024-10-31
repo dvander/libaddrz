@@ -1,0 +1,6 @@
+[submodule "third_party/amtl"]
+	path = third_party/amtl
+	url = https://github.com/alliedmodders/amtl
+[submodule "third_party/googletest"]
+	path = third_party/googletest
+	url = https://github.com/google/googletest
