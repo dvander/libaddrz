@@ -33,8 +33,10 @@
 
 using namespace am;
 
+#ifndef _WIN32
 TEST(proc_maps, ReadProcMaps) {
     std::vector<Mapping> maps;
     ASSERT_TRUE(ReadProcMaps(&maps));
     ASSERT_FALSE(maps.empty());
 }
+#endif

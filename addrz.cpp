@@ -88,7 +88,7 @@ std::optional<uint32_t> AddressDict::Make32bitAddress(void* address, size_t nbyt
 
     if (!ke::IsUint32AddSafe(range.id, (value - range.map.start)))
         return {};
-    return {range.id + (value - range.map.start)};
+    return {range.id + uint32_t(value - range.map.start)};
 }
 
 std::optional<void*> AddressDict::RecoverAddress(uint32_t id, size_t nbytes) {

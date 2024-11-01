@@ -10,6 +10,13 @@ if builder.cxx.like('gcc'):
     builder.cxx.cxxflags += [
         '-std=c++17',
     ]
+elif builder.cxx.like('msvc'):
+    builder.cxx.cxxflags += [
+        '/EHsc',
+        '/GR-',
+        '/TP',
+        '/std:c++17',
+    ]
 
 builder.cxx.cxxincludes += [
     os.path.join(builder.sourcePath, 'third_party', 'amtl'),
@@ -24,6 +31,8 @@ libaddrz.sources += [
 ]
 if libaddrz.compiler.target.platform == 'linux':
     libaddrz.sources += ['platform_linux.cpp']
+elif libaddrz.compiler.target.platform == 'windows':
+    libaddrz.sources += ['platform_windows.cpp']
 libaddrz_bin = builder.Add(libaddrz)
 
 ### TESTING ###

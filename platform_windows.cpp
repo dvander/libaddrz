@@ -29,35 +29,43 @@
 
 #include "platform.h"
 
-#include <unistd.h>
+#include <iostream>
+
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 
 #include "proc_maps.h"
 
 namespace am {
 
-class LinuxPlatform final : public IPlatform {
+class WindowsPlatform final : public IPlatform {
   public:
     int GetPageSize() override {
-        return getpagesize();
+        SYSTEM_INFO si;
+        GetSystemInfo(&si);
+        return si.dwPageSize;
     }
     bool GetAddressMapping(void* address, Mapping* map) override {
-        std::vector<Mapping> maps;
-        if (!ReadProcMaps(&maps))
+        MEMORY_BASIC_INFORMATION mbi;
+        if (VirtualQuery(address, &mbi, sizeof(mbi)) == 0)
             return false;
 
-        SortAndCoalesceMaps(maps);
-        auto it = FindAddressInSortedMap(maps, address);
-        if (!it)
+        if (mbi.State == MEM_FREE)
             return false;
 
-        *map = maps[*it];
+        uintptr_t base_address = reinterpret_cast<uintptr_t>(mbi.BaseAddress);
+        uintptr_t alloc_base = reinterpret_cast<uintptr_t>(mbi.AllocationBase);
+
+        map->start = alloc_base;
+        map->size = (base_address + mbi.RegionSize) - alloc_base;
         return true;
     }
 };
 
 IPlatform* IPlatform::GetDefault() {
-    static LinuxPlatform sPlatform;
+    static WindowsPlatform sPlatform;
     return &sPlatform;
 }
 
 } // namespace am
+

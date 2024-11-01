@@ -33,6 +33,7 @@
 #include <stdio.h>
 
 #include <fstream>
+#include <string>
 
 namespace am {
 
